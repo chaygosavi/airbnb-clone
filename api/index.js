@@ -5,6 +5,7 @@ import "dotenv/config";
 import UserModel from "./models/User.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import cookieParser from "cookie-parser";
 
 const bcryptSalt = await bcrypt.genSaltSync(9);
 const jwtSecret = "snfsdlfnjsdifnsdfinjs";
@@ -18,6 +19,7 @@ app.use(
   })
 );
 app.use(express.json());
+app.use(cookieParser());
 
 mongoose.connect(process.env.MONGO_URL);
 
@@ -54,7 +56,7 @@ app.post("/login", async (req, res) => {
           {},
           (err, token) => {
             if (err) throw err;
-            res.status(200).cookie("token", token).json(user);
+            res.cookie("token", token).json(user);
           }
         );
       } else {
@@ -63,6 +65,20 @@ app.post("/login", async (req, res) => {
     }
   } catch (error) {
     res.status(400).json(error);
+  }
+});
+
+app.get("/profile", (req, res) => {
+  const { token } = req.cookies;
+
+  if (token) {
+    jwt.verify(token, jwtSecret, {}, async (err, user) => {
+      if (err) throw err;
+      const { name, email, _id } = await UserModel.findById(user.id);
+      res.json({ name, email, _id });
+    });
+  } else {
+    res.json(null);
   }
 });
 
