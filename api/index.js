@@ -6,6 +6,13 @@ import UserModel from "./models/User.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import cookieParser from "cookie-parser";
+import imageDownloader from "image-downloader";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+
+const __dirname = path.dirname(__filename);
 
 const bcryptSalt = await bcrypt.genSaltSync(9);
 const jwtSecret = "snfsdlfnjsdifnsdfinjs";
@@ -19,7 +26,9 @@ app.use(
   })
 );
 app.use(express.json());
+
 app.use(cookieParser());
+app.use("/uploads", express.static(__dirname + "/uploads"));
 
 mongoose.connect(process.env.MONGO_URL);
 
@@ -84,6 +93,19 @@ app.get("/profile", (req, res) => {
 
 app.post("/logout", (req, res) => {
   res.cookie("token", "").json(true);
+});
+
+console.log(__dirname + "/uploads");
+
+app.post("/upload-by-link", async (req, res) => {
+  const { link } = req.body;
+  const newName = "photo" + Date.now() + ".jpg";
+  await imageDownloader.image({
+    url: link,
+    dest: __dirname + "/uploads/" + newName,
+  });
+
+  res.json(newName);
 });
 
 app.listen(9999);
