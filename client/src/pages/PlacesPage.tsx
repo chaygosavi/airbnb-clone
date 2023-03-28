@@ -1,20 +1,21 @@
 import axios from "axios";
 import React, { FormEvent, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, Navigate, useParams } from "react-router-dom";
 import Perks from "../components/Perks";
+import PhotosUploader from "../components/PhotosUploader";
 
 export default function PlacesPage() {
   const { action } = useParams();
   const [title, setTitle] = useState("");
   const [address, setAddress] = useState("");
-  const [addedPhotos, setAddedPhotos] = useState<string[]>([]);
-  const [photoLink, setPhotoLink] = useState("");
+  const [addedPhotos, setAddedPhotos] = useState([]);
   const [description, setDescription] = useState("");
   const [perks, setPerks] = useState([]);
   const [extraInfo, setExtraInfo] = useState("");
   const [checkIn, setCheckIn] = useState("");
   const [checkOut, setCheckOut] = useState("");
   const [maxGuests, setMaxGuests] = useState(1);
+  const [redirect, setRedirect] = useState("");
 
   function inputHeader(text: string) {
     return <h2 className="text-2xl mt-4">{text}</h2>;
@@ -34,21 +35,26 @@ export default function PlacesPage() {
     );
   }
 
-  async function addPhotoByLink(e: FormEvent) {
+  const addNewPlace = async (e: FormEvent) => {
     e.preventDefault();
-    const { data: fileName } = await axios.post("/upload-by-link", {
-      link: photoLink,
-    });
-    setAddedPhotos((prev) => {
-      return [...prev, fileName];
-    });
-    setPhotoLink("");
-  }
-
-  const uploadPhoto = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    console.log({ files });
+    const placeData = {
+      title,
+      address,
+      addedPhotos,
+      description,
+      perks,
+      extraInfo,
+      checkIn,
+      checkOut,
+      maxGuests,
+    };
+    await axios.post("/places", placeData);
+    setRedirect("/account/places");
   };
+
+  if (redirect) {
+    return <Navigate to={redirect} />;
+  }
 
   return (
     <div>
@@ -67,8 +73,8 @@ export default function PlacesPage() {
               className="w-6 h-6"
             >
               <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
+                strokeLinecap="round"
+                strokeLinejoin="round"
                 d="M12 4.5v15m7.5-7.5h-15"
               />
             </svg>
@@ -78,7 +84,7 @@ export default function PlacesPage() {
       )}
       {action === "new" && (
         <div>
-          <form>
+          <form onSubmit={addNewPlace}>
             {preInput(
               "Title",
               "Title for your place should be short and catchy as in advertisement."
@@ -97,55 +103,10 @@ export default function PlacesPage() {
               placeholder="address"
             />
             {preInput("Photos", "more = better")}
-            <div className="flex gap-2">
-              <input
-                value={photoLink}
-                onChange={(e) => setPhotoLink(e.target.value)}
-                type="text"
-                placeholder="Add using a link ...jpg"
-              />
-              <button
-                onClick={addPhotoByLink}
-                className="bg-gray-200 px-4 rounded-2xl"
-              >
-                Add&nbsp;photo
-              </button>
-            </div>
-            <div className="mt-2 grid gap-2 grid-cols-3 lg:grid-cols-6 md:grid-cols-4">
-              {addedPhotos?.map((link) => (
-                <div>
-                  <img
-                    className="rounded-2xl w-full h-full object-cover"
-                    src={"http://localhost:9999/uploads/" + link}
-                    alt=""
-                  />
-                </div>
-              ))}
-              <label className="border cursor-pointer bg-transparent items-center rounded-2xl justify-center gap-1 flex p-2 text-2xl text-gray-600">
-                <input
-                  type="file"
-                  className="hidden"
-                  name=""
-                  id=""
-                  onChange={uploadPhoto}
-                />
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke-width="1.5"
-                  stroke="currentColor"
-                  className="w-8 h-8"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="M12 16.5V9.75m0 0l3 3m-3-3l-3 3M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.233-2.33 3 3 0 013.758 3.848A3.752 3.752 0 0118 19.5H6.75z"
-                  />
-                </svg>
-                Upload
-              </label>
-            </div>
+            <PhotosUploader
+              addedPhotos={addedPhotos}
+              onChange={setAddedPhotos}
+            />
             <h2 className="text-2xl mt-4">Description</h2>
             <p className="text-gray-500 text-sm">description of the place</p>
             <textarea

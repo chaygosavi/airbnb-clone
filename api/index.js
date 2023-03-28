@@ -9,6 +9,8 @@ import cookieParser from "cookie-parser";
 import imageDownloader from "image-downloader";
 import path from "path";
 import { fileURLToPath } from "url";
+import multer from "multer";
+import fs from "fs";
 
 const __filename = fileURLToPath(import.meta.url);
 
@@ -95,8 +97,6 @@ app.post("/logout", (req, res) => {
   res.cookie("token", "").json(true);
 });
 
-console.log(__dirname + "/uploads");
-
 app.post("/upload-by-link", async (req, res) => {
   const { link } = req.body;
   const newName = "photo" + Date.now() + ".jpg";
@@ -106,6 +106,21 @@ app.post("/upload-by-link", async (req, res) => {
   });
 
   res.json(newName);
+});
+
+const photosMiddleware = multer({ dest: "uploads" });
+
+app.post("/upload", photosMiddleware.array("photos", 100), (req, res) => {
+  const uploadedFiles = [];
+  for (let i = 0; i < req.files.length; i++) {
+    const { path, originalname } = req.files[i];
+    const parts = originalname.split(".");
+    fs.renameSync(path, path + "." + parts[parts.length - 1]);
+    uploadedFiles.push(
+      (path + "." + parts[parts.length - 1]).replace("uploads\\", "")
+    );
+  }
+  res.json(uploadedFiles);
 });
 
 app.listen(9999);

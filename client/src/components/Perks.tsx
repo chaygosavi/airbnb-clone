@@ -1,10 +1,21 @@
-import React from "react";
+import React, { FormEvent } from "react";
 
 export default function Perks({ selected, onChange }) {
+  function handleCbClick(e: FormEvent) {
+    const { checked, name } = e.target;
+
+    if (checked) {
+      onChange([...selected, name]);
+    } else {
+      onChange([...selected.filter((item) => item !== name)]);
+    }
+    // onChange([...selected, [e.target.name]:]);
+  }
+
   return (
     <>
       <label className="border p-4 flex rounded-2xl gap-2 items-center cursor-pointer">
-        <input type="checkbox" name="" id="" />
+        <input type="checkbox" name="wifi" id="" onChange={handleCbClick} />
         <svg
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
@@ -23,7 +34,7 @@ export default function Perks({ selected, onChange }) {
         <span>Wifi</span>
       </label>
       <label className="border p-4 flex rounded-2xl gap-2 items-center cursor-pointer">
-        <input type="checkbox" name="" id="" />
+        <input type="checkbox" name="parking" id="" onChange={handleCbClick} />
         <svg
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
@@ -42,7 +53,7 @@ export default function Perks({ selected, onChange }) {
         <span>Wifi</span>
       </label>{" "}
       <label className="border p-4 flex rounded-2xl gap-2 items-center cursor-pointer">
-        <input type="checkbox" name="" id="" />
+        <input type="checkbox" name="tv" id="" onChange={handleCbClick} />
         <svg
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
@@ -61,7 +72,7 @@ export default function Perks({ selected, onChange }) {
         <span>Wifi</span>
       </label>{" "}
       <label className="border p-4 flex rounded-2xl gap-2 items-center cursor-pointer">
-        <input type="checkbox" name="" id="" />
+        <input type="checkbox" name="radio" id="" onChange={handleCbClick} />
         <svg
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
@@ -80,7 +91,7 @@ export default function Perks({ selected, onChange }) {
         <span>Wifi</span>
       </label>{" "}
       <label className="border p-4 flex rounded-2xl gap-2 items-center cursor-pointer">
-        <input type="checkbox" name="" id="" />
+        <input type="checkbox" name="pets" id="" onChange={handleCbClick} />
         <svg
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
@@ -99,7 +110,7 @@ export default function Perks({ selected, onChange }) {
         <span>Wifi</span>
       </label>{" "}
       <label className="border p-4 flex rounded-2xl gap-2 items-center cursor-pointer">
-        <input type="checkbox" name="" id="" />
+        <input type="checkbox" name="entrance" id="" onChange={handleCbClick} />
         <svg
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
